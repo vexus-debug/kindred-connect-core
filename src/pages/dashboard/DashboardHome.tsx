@@ -277,6 +277,86 @@ export default function DashboardHome() {
         )}
       </motion.div>
 
+      {/* ── Row 2b: Insight widgets ─────────────────────────────── */}
+      <motion.div
+        className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+        variants={stagger.container}
+        initial="hidden"
+        animate="visible"
+      >
+        {/* Next up */}
+        {canSeeAppointments && (
+          <motion.div variants={stagger.item} className="min-w-0">
+            <Card className="border-border/50 bg-card h-full overflow-hidden">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Clock className="h-3.5 w-3.5 text-primary" />
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Next Up</p>
+                </div>
+                {nextAppointment ? (
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-foreground truncate">{nextAppointment.patientName}</p>
+                    <p className="text-[11px] text-muted-foreground truncate">
+                      {nextAppointment.time} · {nextAppointment.treatment} · {nextAppointment.chair}
+                    </p>
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">Nothing left today</p>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+
+        {/* Today's progress */}
+        {canSeeAppointments && (
+          <motion.div variants={stagger.item} className="min-w-0">
+            <Card className="border-border/50 bg-card h-full overflow-hidden">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Zap className="h-3.5 w-3.5 text-emerald-600" />
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Today's Progress</p>
+                </div>
+                <p className="text-lg font-bold tabular-nums text-foreground">
+                  {completedToday}/{schedule.length || 0} <span className="text-xs font-medium text-muted-foreground">completed</span>
+                </p>
+                <div className="h-2 w-full bg-muted rounded-full overflow-hidden mt-2">
+                  <motion.div
+                    className="h-full rounded-full bg-emerald-500"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${completionPct}%` }}
+                    transition={{ duration: 0.7, ease: "easeOut" }}
+                  />
+                </div>
+                <p className="text-[11px] text-muted-foreground mt-1.5">
+                  {inProgressToday} in progress · {cancelledToday} cancelled
+                </p>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+
+        {/* Revenue pace */}
+        {canSeeBilling && (
+          <motion.div variants={stagger.item} className="min-w-0">
+            <Card className="border-border/50 bg-card h-full overflow-hidden">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <TrendingUp className="h-3.5 w-3.5 text-primary" />
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Revenue Pace</p>
+                </div>
+                <p className="text-lg font-bold tabular-nums text-foreground truncate">{formatCurrency(avgMonthlyRevenue)}</p>
+                <p className="text-[11px] text-muted-foreground mt-1">
+                  6-month average · best {bestMonth ? `${bestMonth.month} (${formatCurrency(bestMonth.revenue)})` : "—"}
+                </p>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+      </motion.div>
+
+
+
       {/* ── Row 3: Revenue Chart (wide) + Treatment Breakdown (narrow) ── */}
       {(canSeeAppointments || canSeeBilling) && (
         <motion.div
