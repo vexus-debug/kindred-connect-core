@@ -257,7 +257,7 @@ export default function AppointmentsPage() {
                           const appointmentsAtTime = displayAppointments.filter((a) => a.time === time);
                           return (
                             <tr key={time} className="border-b border-border/20 hover:bg-accent/20 transition-colors">
-                              <td className="py-2 px-3 text-xs text-muted-foreground font-mono">{time}</td>
+                              <td className="py-2 px-3 text-xs text-muted-foreground font-mono">{label12(time)}</td>
                               {chairs.map((chair) => {
                                 const apt = appointmentsAtTime.find((a) => a.chair === chair);
                                 return (
