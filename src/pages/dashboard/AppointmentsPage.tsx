@@ -259,7 +259,7 @@ export default function AppointmentsPage() {
                             <tr key={time} className="border-b border-border/20 hover:bg-accent/20 transition-colors">
                               <td className="py-2 px-3 text-xs text-muted-foreground font-mono">{label12(time)}</td>
                               {chairs.map((chair) => {
-                                const apt = appointmentsAtTime.find((a) => a.chair === chair);
+                                const apt = appointmentsAtTime.find((a) => (a.chair || "Unassigned") === chair);
                                 return (
                                   <td key={chair} className="py-1 px-2">
                                     {apt ? (
