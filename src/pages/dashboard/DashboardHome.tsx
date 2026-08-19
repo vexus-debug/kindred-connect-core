@@ -135,6 +135,23 @@ export default function DashboardHome() {
     canSeeBilling     && { to: `${basePath}/billing`,      icon: FileText,    title: "Create Invoice" },
   ].filter(Boolean) as any[];
 
+  /* Derived widget data */
+  const completedToday = schedule.filter((a) => a.status === "completed").length;
+  const inProgressToday = schedule.filter((a) => a.status === "in-progress").length;
+  const cancelledToday = schedule.filter((a) => a.status === "cancelled").length;
+  const completionPct = schedule.length ? Math.round((completedToday / schedule.length) * 100) : 0;
+  const nowHHmm = format(new Date(), "HH:mm");
+  const nextAppointment =
+    schedule.find((a) => a.status === "scheduled" && a.time >= nowHHmm) ||
+    schedule.find((a) => a.status === "scheduled");
+  const revSeries = revenueData || [];
+  const avgMonthlyRevenue = revSeries.length
+    ? Math.round(revSeries.reduce((sum, r) => sum + r.revenue, 0) / revSeries.length)
+    : 0;
+  const bestMonth = revSeries.length
+    ? revSeries.reduce((best, r) => (r.revenue > best.revenue ? r : best), revSeries[0])
+    : null;
+
   return (
     <div className="space-y-5">
 
