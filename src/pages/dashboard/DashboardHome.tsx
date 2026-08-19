@@ -287,7 +287,7 @@ export default function DashboardHome() {
         >
           {/* Revenue trend — sleek area */}
           {canSeeBilling && (
-            <motion.div variants={stagger.item} className="lg:col-span-3">
+            <motion.div variants={stagger.item} className="lg:col-span-3 min-w-0">
               <Card className="border-border/50 bg-card h-full hover:shadow-lg transition-shadow duration-300">
                 <CardHeader className="pb-2">
                   <div className="flex items-center justify-between">
@@ -344,7 +344,7 @@ export default function DashboardHome() {
           )}
 
           {/* Treatment breakdown — horizontal bars */}
-          <motion.div variants={stagger.item} className="lg:col-span-2">
+          <motion.div variants={stagger.item} className="lg:col-span-2 min-w-0">
             <Card className="border-border/50 bg-card h-full hover:shadow-lg transition-shadow duration-300">
               <CardHeader className="pb-3">
                 <div className="flex items-center gap-3">
@@ -405,7 +405,8 @@ export default function DashboardHome() {
 
         {/* Today's Schedule — Timeline Cards */}
         {canSeeAppointments && (
-          <Card className="lg:col-span-5 border-border/50 bg-card hover:shadow-lg transition-shadow duration-300">
+          <Card className="lg:col-span-5 min-w-0 overflow-hidden border-border/50 bg-card hover:shadow-lg transition-shadow duration-300">
+
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -483,7 +484,7 @@ export default function DashboardHome() {
         {/* Weekly Appointments — Vertical bars with day labels */}
         {canSeeAppointments && (
           <motion.div
-            className="lg:col-span-4"
+            className="lg:col-span-4 min-w-0"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
@@ -529,7 +530,7 @@ export default function DashboardHome() {
         )}
 
         {/* Activity Feed — Compact Timeline */}
-        <Card className="lg:col-span-3 border-border/50 bg-card hover:shadow-lg transition-shadow duration-300">
+        <Card className="lg:col-span-3 min-w-0 overflow-hidden border-border/50 bg-card hover:shadow-lg transition-shadow duration-300">
           <CardHeader className="pb-3">
             <div className="flex items-center gap-3">
               <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
