@@ -20,8 +20,30 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrg } from "@/hooks/useOrg";
 
-const chairs = ["Chair 1", "Chair 2", "Chair 3"];
-const timeSlots = ["09:00 AM", "09:30 AM", "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM", "12:00 PM", "12:30 PM", "01:00 PM", "01:30 PM", "02:00 PM", "02:30 PM", "03:00 PM", "03:30 PM", "04:00 PM"];
+const defaultChairs = ["Chair 1", "Chair 2", "Chair 3"];
+const defaultSlots = ["09:00", "09:30", "10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00"];
+
+/** Normalise any stored time ("09:00:00", "9:00 AM", "09:00") to "HH:mm". */
+function toHHmm(raw?: string | null): string {
+  if (!raw) return "";
+  const s = raw.trim();
+  const ampm = s.match(/^(\d{1,2}):(\d{2})\s*([AaPp])[Mm]?$/);
+  if (ampm) {
+    let h = parseInt(ampm[1], 10) % 12;
+    if (ampm[3].toLowerCase() === "p") h += 12;
+    return `${String(h).padStart(2, "0")}:${ampm[2]}`;
+  }
+  const m = s.match(/^(\d{1,2}):(\d{2})/);
+  return m ? `${m[1].padStart(2, "0")}:${m[2]}` : s;
+}
+
+function label12(hhmm: string) {
+  const [h, m] = hhmm.split(":").map(Number);
+  if (isNaN(h)) return hhmm;
+  const suffix = h >= 12 ? "PM" : "AM";
+  const hr = h % 12 === 0 ? 12 : h % 12;
+  return `${String(hr).padStart(2, "0")}:${String(m).padStart(2, "0")} ${suffix}`;
+}
 
 const statusColors: Record<string, string> = {
   scheduled: "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20",
