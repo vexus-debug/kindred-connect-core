@@ -207,8 +207,7 @@
 .stat-card {
   position: relative;
   overflow: hidden;
-  transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
-  will-change: transform, box-shadow;
+  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.28s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.28s;
   border: 1px solid hsl(var(--border));
   background: hsl(var(--card));
 }
@@ -220,18 +219,17 @@
   background: var(--stat-card-bar, linear-gradient(90deg, hsl(var(--primary)), hsl(var(--dental-teal-light))));
 }
 .stat-card:hover {
-  transform: translateY(-4px) translateZ(0);
+  transform: translateY(-4px);
   box-shadow: 0 16px 32px -8px hsl(var(--primary) / 0.14), var(--shadow-lg);
   border-color: hsl(var(--primary) / 0.25);
 }
 
 /* ─── Card hover lift ───────────────────────────────────── */
 .card-hover {
-  transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
-  will-change: transform, box-shadow;
+  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.28s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.28s;
 }
 .card-hover:hover {
-  transform: translateY(-3px) translateZ(0);
+  transform: translateY(-3px);
   box-shadow: var(--shadow-lg);
 }
 
