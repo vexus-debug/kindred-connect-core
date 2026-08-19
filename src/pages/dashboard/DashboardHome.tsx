@@ -135,6 +135,23 @@ export default function DashboardHome() {
     canSeeBilling     && { to: `${basePath}/billing`,      icon: FileText,    title: "Create Invoice" },
   ].filter(Boolean) as any[];
 
+  /* Derived widget data */
+  const completedToday = schedule.filter((a) => a.status === "completed").length;
+  const inProgressToday = schedule.filter((a) => a.status === "in-progress").length;
+  const cancelledToday = schedule.filter((a) => a.status === "cancelled").length;
+  const completionPct = schedule.length ? Math.round((completedToday / schedule.length) * 100) : 0;
+  const nowHHmm = format(new Date(), "HH:mm");
+  const nextAppointment =
+    schedule.find((a) => a.status === "scheduled" && a.time >= nowHHmm) ||
+    schedule.find((a) => a.status === "scheduled");
+  const revSeries = revenueData || [];
+  const avgMonthlyRevenue = revSeries.length
+    ? Math.round(revSeries.reduce((sum, r) => sum + r.revenue, 0) / revSeries.length)
+    : 0;
+  const bestMonth = revSeries.length
+    ? revSeries.reduce((best, r) => (r.revenue > best.revenue ? r : best), revSeries[0])
+    : null;
+
   return (
     <div className="space-y-5">
 
@@ -277,6 +294,86 @@ export default function DashboardHome() {
         )}
       </motion.div>
 
+      {/* ── Row 2b: Insight widgets ─────────────────────────────── */}
+      <motion.div
+        className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+        variants={stagger.container}
+        initial="hidden"
+        animate="visible"
+      >
+        {/* Next up */}
+        {canSeeAppointments && (
+          <motion.div variants={stagger.item} className="min-w-0">
+            <Card className="border-border/50 bg-card h-full overflow-hidden">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Clock className="h-3.5 w-3.5 text-primary" />
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Next Up</p>
+                </div>
+                {nextAppointment ? (
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-foreground truncate">{nextAppointment.patientName}</p>
+                    <p className="text-[11px] text-muted-foreground truncate">
+                      {nextAppointment.time} · {nextAppointment.treatment} · {nextAppointment.chair}
+                    </p>
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">Nothing left today</p>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+
+        {/* Today's progress */}
+        {canSeeAppointments && (
+          <motion.div variants={stagger.item} className="min-w-0">
+            <Card className="border-border/50 bg-card h-full overflow-hidden">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Zap className="h-3.5 w-3.5 text-emerald-600" />
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Today's Progress</p>
+                </div>
+                <p className="text-lg font-bold tabular-nums text-foreground">
+                  {completedToday}/{schedule.length || 0} <span className="text-xs font-medium text-muted-foreground">completed</span>
+                </p>
+                <div className="h-2 w-full bg-muted rounded-full overflow-hidden mt-2">
+                  <motion.div
+                    className="h-full rounded-full bg-emerald-500"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${completionPct}%` }}
+                    transition={{ duration: 0.7, ease: "easeOut" }}
+                  />
+                </div>
+                <p className="text-[11px] text-muted-foreground mt-1.5">
+                  {inProgressToday} in progress · {cancelledToday} cancelled
+                </p>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+
+        {/* Revenue pace */}
+        {canSeeBilling && (
+          <motion.div variants={stagger.item} className="min-w-0">
+            <Card className="border-border/50 bg-card h-full overflow-hidden">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <TrendingUp className="h-3.5 w-3.5 text-primary" />
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Revenue Pace</p>
+                </div>
+                <p className="text-lg font-bold tabular-nums text-foreground truncate">{formatCurrency(avgMonthlyRevenue)}</p>
+                <p className="text-[11px] text-muted-foreground mt-1">
+                  6-month average · best {bestMonth ? `${bestMonth.month} (${formatCurrency(bestMonth.revenue)})` : "—"}
+                </p>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+      </motion.div>
+
+
+
       {/* ── Row 3: Revenue Chart (wide) + Treatment Breakdown (narrow) ── */}
       {(canSeeAppointments || canSeeBilling) && (
         <motion.div
@@ -287,7 +384,7 @@ export default function DashboardHome() {
         >
           {/* Revenue trend — sleek area */}
           {canSeeBilling && (
-            <motion.div variants={stagger.item} className="lg:col-span-3">
+            <motion.div variants={stagger.item} className="lg:col-span-3 min-w-0">
               <Card className="border-border/50 bg-card h-full hover:shadow-lg transition-shadow duration-300">
                 <CardHeader className="pb-2">
                   <div className="flex items-center justify-between">
@@ -344,7 +441,7 @@ export default function DashboardHome() {
           )}
 
           {/* Treatment breakdown — horizontal bars */}
-          <motion.div variants={stagger.item} className="lg:col-span-2">
+          <motion.div variants={stagger.item} className="lg:col-span-2 min-w-0">
             <Card className="border-border/50 bg-card h-full hover:shadow-lg transition-shadow duration-300">
               <CardHeader className="pb-3">
                 <div className="flex items-center gap-3">
@@ -405,7 +502,8 @@ export default function DashboardHome() {
 
         {/* Today's Schedule — Timeline Cards */}
         {canSeeAppointments && (
-          <Card className="lg:col-span-5 border-border/50 bg-card hover:shadow-lg transition-shadow duration-300">
+          <Card className="lg:col-span-5 min-w-0 overflow-hidden border-border/50 bg-card hover:shadow-lg transition-shadow duration-300">
+
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -483,7 +581,7 @@ export default function DashboardHome() {
         {/* Weekly Appointments — Vertical bars with day labels */}
         {canSeeAppointments && (
           <motion.div
-            className="lg:col-span-4"
+            className="lg:col-span-4 min-w-0"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
@@ -529,7 +627,7 @@ export default function DashboardHome() {
         )}
 
         {/* Activity Feed — Compact Timeline */}
-        <Card className="lg:col-span-3 border-border/50 bg-card hover:shadow-lg transition-shadow duration-300">
+        <Card className="lg:col-span-3 min-w-0 overflow-hidden border-border/50 bg-card hover:shadow-lg transition-shadow duration-300">
           <CardHeader className="pb-3">
             <div className="flex items-center gap-3">
               <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">

@@ -20,8 +20,30 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrg } from "@/hooks/useOrg";
 
-const chairs = ["Chair 1", "Chair 2", "Chair 3"];
-const timeSlots = ["09:00 AM", "09:30 AM", "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM", "12:00 PM", "12:30 PM", "01:00 PM", "01:30 PM", "02:00 PM", "02:30 PM", "03:00 PM", "03:30 PM", "04:00 PM"];
+const defaultChairs = ["Chair 1", "Chair 2", "Chair 3"];
+const defaultSlots = ["09:00", "09:30", "10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00"];
+
+/** Normalise any stored time ("09:00:00", "9:00 AM", "09:00") to "HH:mm". */
+function toHHmm(raw?: string | null): string {
+  if (!raw) return "";
+  const s = raw.trim();
+  const ampm = s.match(/^(\d{1,2}):(\d{2})\s*([AaPp])[Mm]?$/);
+  if (ampm) {
+    let h = parseInt(ampm[1], 10) % 12;
+    if (ampm[3].toLowerCase() === "p") h += 12;
+    return `${String(h).padStart(2, "0")}:${ampm[2]}`;
+  }
+  const m = s.match(/^(\d{1,2}):(\d{2})/);
+  return m ? `${m[1].padStart(2, "0")}:${m[2]}` : s;
+}
+
+function label12(hhmm: string) {
+  const [h, m] = hhmm.split(":").map(Number);
+  if (isNaN(h)) return hhmm;
+  const suffix = h >= 12 ? "PM" : "AM";
+  const hr = h % 12 === 0 ? 12 : h % 12;
+  return `${String(hr).padStart(2, "0")}:${String(m).padStart(2, "0")} ${suffix}`;
+}
 
 const statusColors: Record<string, string> = {
   scheduled: "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20",
@@ -73,9 +95,13 @@ export default function AppointmentsPage() {
     ...a,
     patientName: a.patients ? `${a.patients.first_name} ${a.patients.last_name}` : "Unknown",
     dentist: a.staff?.full_name || "Unknown",
-    time: a.appointment_time,
+    time: toHHmm(a.appointment_time),
     treatment: a.treatments?.name || "N/A",
   }));
+
+  // Columns / rows derived from actual data so nothing is hidden by hardcoded lists
+  const chairs = Array.from(new Set([...defaultChairs, ...displayAppointments.map((a) => a.chair || "Unassigned")]));
+  const timeSlots = Array.from(new Set([...defaultSlots, ...displayAppointments.map((a) => a.time).filter(Boolean)])).sort();
 
   const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
@@ -231,9 +257,9 @@ export default function AppointmentsPage() {
                           const appointmentsAtTime = displayAppointments.filter((a) => a.time === time);
                           return (
                             <tr key={time} className="border-b border-border/20 hover:bg-accent/20 transition-colors">
-                              <td className="py-2 px-3 text-xs text-muted-foreground font-mono">{time}</td>
+                              <td className="py-2 px-3 text-xs text-muted-foreground font-mono">{label12(time)}</td>
                               {chairs.map((chair) => {
-                                const apt = appointmentsAtTime.find((a) => a.chair === chair);
+                                const apt = appointmentsAtTime.find((a) => (a.chair || "Unassigned") === chair);
                                 return (
                                   <td key={chair} className="py-1 px-2">
                                     {apt ? (
@@ -345,7 +371,7 @@ export default function AppointmentsPage() {
                         const initials = apt.patientName.split(" ").map((n: string) => n[0]).join("").slice(0, 2);
                         return (
                           <motion.tr key={apt.id} className="border-b border-border/30 last:border-0 hover:bg-accent/30 cursor-pointer transition-all group" onClick={() => setSelectedAppointment(apt)} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.02 }}>
-                            <td className="py-3 px-4 font-mono text-xs">{apt.time}</td>
+                            <td className="py-3 px-4 font-mono text-xs">{label12(apt.time)}</td>
                             <td className="py-3 px-4">
                               <div className="flex items-center gap-2.5">
                                 <Avatar className="h-7 w-7">
