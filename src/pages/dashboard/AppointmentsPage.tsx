@@ -100,7 +100,7 @@ export default function AppointmentsPage() {
   }));
 
   // Columns / rows derived from actual data so nothing is hidden by hardcoded lists
-  const chairs = Array.from(new Set([...defaultChairs, ...displayAppointments.map((a) => a.chair).filter(Boolean)]));
+  const chairs = Array.from(new Set([...defaultChairs, ...displayAppointments.map((a) => a.chair || "Unassigned")]));
   const timeSlots = Array.from(new Set([...defaultSlots, ...displayAppointments.map((a) => a.time).filter(Boolean)])).sort();
 
   const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
@@ -371,7 +371,7 @@ export default function AppointmentsPage() {
                         const initials = apt.patientName.split(" ").map((n: string) => n[0]).join("").slice(0, 2);
                         return (
                           <motion.tr key={apt.id} className="border-b border-border/30 last:border-0 hover:bg-accent/30 cursor-pointer transition-all group" onClick={() => setSelectedAppointment(apt)} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.02 }}>
-                            <td className="py-3 px-4 font-mono text-xs">{apt.time}</td>
+                            <td className="py-3 px-4 font-mono text-xs">{label12(apt.time)}</td>
                             <td className="py-3 px-4">
                               <div className="flex items-center gap-2.5">
                                 <Avatar className="h-7 w-7">
