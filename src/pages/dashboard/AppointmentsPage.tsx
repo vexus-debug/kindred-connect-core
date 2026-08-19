@@ -95,9 +95,13 @@ export default function AppointmentsPage() {
     ...a,
     patientName: a.patients ? `${a.patients.first_name} ${a.patients.last_name}` : "Unknown",
     dentist: a.staff?.full_name || "Unknown",
-    time: a.appointment_time,
+    time: toHHmm(a.appointment_time),
     treatment: a.treatments?.name || "N/A",
   }));
+
+  // Columns / rows derived from actual data so nothing is hidden by hardcoded lists
+  const chairs = Array.from(new Set([...defaultChairs, ...displayAppointments.map((a) => a.chair).filter(Boolean)]));
+  const timeSlots = Array.from(new Set([...defaultSlots, ...displayAppointments.map((a) => a.time).filter(Boolean)])).sort();
 
   const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
