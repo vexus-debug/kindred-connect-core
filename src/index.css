@@ -196,11 +196,11 @@
   .elevation-4 { box-shadow: var(--shadow-lg); }
   .elevation-5 { box-shadow: var(--shadow-xl); }
 
-  .gpu-accelerated {
-    transform: translateZ(0);
-    will-change: transform, opacity;
-    backface-visibility: hidden;
-  }
+  /* No permanent layer promotion: persistent will-change/translateZ caused
+     composited-tile corruption on mobile Chrome. Framer Motion promotes
+     during animation on its own. */
+  .gpu-accelerated { transform: none; }
+
 }
 
 /* ─── Premium Stat Card ─────────────────────────────────── */
